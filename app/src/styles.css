@@ -151,3 +151,10 @@ a {
   justify-content: flex-end;
   margin: 0;
 }
+
+/* Variable inspector popup width override vs the moneyjs default (28rem).
+   Two-class selector wins specificity over .publication-inspector-popup. */
+.publication-inspector-popup.stability-raw-floating-panel {
+  width: min(28rem, calc(100vw - 2rem));
+  max-width: min(28rem, calc(100vw - 2rem));
+}

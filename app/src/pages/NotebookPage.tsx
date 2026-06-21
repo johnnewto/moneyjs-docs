@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { SimulationResult } from "@sfcr/core";
 import {
@@ -6,11 +6,21 @@ import {
   buildPublicationViewModel
 } from "@web/publication/buildPublicationViewModel";
 import { PublicationCellView } from "@web/publication/PublicationCellView";
-import { mergePublicationVariableInteraction } from "@web/publication/publicationInspect";
+import {
+  buildPublicationInspectRequest,
+  mergePublicationVariableInteraction,
+  resolvePublicationInspectContext,
+  type PublicationVariableInteraction
+} from "@web/publication/publicationInspect";
+import { PublicationVariableInspectorPopup } from "@web/publication/PublicationVariableInspectorPopup";
 import { buildPublicationVariableDescriptions } from "@web/publication/publicationVariables";
 import { buildNotebookVariableUnitMetadata } from "@web/notebook/notebookAppHelpers";
+import type { NotebookCell } from "@web/notebook/types";
 import type { NotebookTemplateId } from "@web/notebook/templates";
+import { useInspectorVariableHistory } from "@web/hooks/useInspectorVariableHistory";
+import { isSameInspectorContext, type VariableInspectRequest } from "@web/lib/variableInspect";
 import "@web/styles/publication-bundle.css";
+import "@web/styles/partials/inspector.css";
 
 import { NotebookContents } from "../components/NotebookContents";
 import { loadNotebook, type LoadedNotebook } from "../staticRunner";
@@ -89,6 +99,55 @@ export function NotebookPage({ id }: { id: string }) {
     return resolveMaxPeriodIndex(notebook.getResult, runCellIds);
   }, [notebook]);
 
+  const [inspectorContext, setInspectorContext] = useState<VariableInspectRequest | null>(null);
+  const inspectorHistory = useInspectorVariableHistory();
+
+  const handleInspectRequest = useCallback(
+    (request: VariableInspectRequest) => {
+      setInspectorContext((current) => {
+        if (current && isSameInspectorContext(current, request)) {
+          inspectorHistory.push(request.selectedVariable);
+        } else {
+          inspectorHistory.reset(request.selectedVariable);
+        }
+        return request;
+      });
+    },
+    [inspectorHistory]
+  );
+
+  const handleInspectorSelectVariable = useCallback(
+    (selectedVariable: string) => {
+      setInspectorContext((current) =>
+        current ? { ...current, selectedVariable } : current
+      );
+      inspectorHistory.push(selectedVariable);
+    },
+    [inspectorHistory]
+  );
+
+  const handleInspectorGoBack = useCallback(() => {
+    const variableName = inspectorHistory.goBack();
+    if (variableName) {
+      setInspectorContext((current) =>
+        current ? { ...current, selectedVariable: variableName } : current
+      );
+    }
+  }, [inspectorHistory]);
+
+  const handleInspectorGoForward = useCallback(() => {
+    const variableName = inspectorHistory.goForward();
+    if (variableName) {
+      setInspectorContext((current) =>
+        current ? { ...current, selectedVariable: variableName } : current
+      );
+    }
+  }, [inspectorHistory]);
+
+  const handleCloseInspector = useCallback(() => {
+    setInspectorContext(null);
+  }, []);
+
   if (status === "loading") {
     return (
       <div className="docs-shell">
@@ -107,12 +166,35 @@ export function NotebookPage({ id }: { id: string }) {
     );
   }
 
-  const interaction = mergePublicationVariableInteraction({
-    descriptions: variableDescriptions,
-    unitMetadata: variableUnitMetadata,
-    inspectContext: null,
-    highlightedVariable: null
-  });
+  const highlightedVariable = inspectorContext?.selectedVariable ?? null;
+  const loadedNotebook = notebook;
+
+  const buildCellInteraction = (cell: NotebookCell): PublicationVariableInteraction => {
+    const inspectContext = resolvePublicationInspectContext({
+      cell,
+      document: loadedNotebook.document,
+      getResult: loadedNotebook.getResult,
+      selectedPeriodIndex
+    });
+
+    return mergePublicationVariableInteraction({
+      descriptions: variableDescriptions,
+      unitMetadata: variableUnitMetadata,
+      inspectContext,
+      highlightedVariable,
+      onInspectVariable: inspectContext
+        ? (selectedVariable) => {
+            handleInspectRequest(
+              buildPublicationInspectRequest({
+                context: inspectContext,
+                document: loadedNotebook.document,
+                selectedVariable
+              })
+            );
+          }
+        : undefined
+    });
+  };
 
   const showContents = contentsEntries.length > 1;
 
@@ -138,7 +220,7 @@ export function NotebookPage({ id }: { id: string }) {
                 key={section.anchorId}
                 cells={notebook.document.cells}
                 getResult={notebook.getResult}
-                interaction={interaction}
+                interaction={buildCellInteraction(section.cell)}
                 section={section}
                 selectedPeriodIndex={selectedPeriodIndex}
               />
@@ -152,7 +234,7 @@ export function NotebookPage({ id }: { id: string }) {
                     key={section.anchorId}
                     cells={notebook.document.cells}
                     getResult={notebook.getResult}
-                    interaction={interaction}
+                    interaction={buildCellInteraction(section.cell)}
                     section={section}
                     selectedPeriodIndex={selectedPeriodIndex}
                   />
@@ -166,6 +248,21 @@ export function NotebookPage({ id }: { id: string }) {
           ) : null}
         </div>
       </div>
+
+      {inspectorContext ? (
+        <PublicationVariableInspectorPopup
+          canGoBack={inspectorHistory.canGoBack}
+          canGoForward={inspectorHistory.canGoForward}
+          getResult={notebook.getResult}
+          inspectorContext={inspectorContext}
+          notebookDocument={notebook.document}
+          onClose={handleCloseInspector}
+          onGoBack={handleInspectorGoBack}
+          onGoForward={handleInspectorGoForward}
+          onSelectVariable={handleInspectorSelectVariable}
+          selectedPeriodIndex={selectedPeriodIndex}
+        />
+      ) : null}
     </div>
   );
 }
