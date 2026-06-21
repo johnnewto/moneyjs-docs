@@ -8,6 +8,7 @@
     "onlyBuiltDependencies": ["esbuild"]
   },
   "scripts": {
+    "menu": "node scripts/dev-menu.mjs",
     "build:data": "pnpm --filter @sfcr/docs-site build:data",
     "dev": "pnpm --filter @sfcr/docs-site dev",
     "build": "pnpm --filter @sfcr/docs-site build",
