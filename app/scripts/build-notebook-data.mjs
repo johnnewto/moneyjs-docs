@@ -13,7 +13,10 @@ const webRoot = path.resolve(moneyjsRoot, "packages/web");
 const templatesRoot = path.resolve(appRoot, "notebooks");
 const dataRoot = path.resolve(appRoot, "src/data");
 
-const TEMPLATE_IDS = ["sim", "bmw", "gl2-pc"];
+const TEMPLATE_IDS = (await fs.readdir(templatesRoot))
+  .filter((name) => name.endsWith(".notebook.yaml"))
+  .map((name) => name.slice(0, -".notebook.yaml".length))
+  .sort();
 
 const coreEntry = path.resolve(moneyjsRoot, "packages/core/src/index.ts");
 const notebookCoreEntry = path.resolve(moneyjsRoot, "packages/notebook-core/src/index.ts");
@@ -59,42 +62,48 @@ try {
   await fs.mkdir(dataRoot, { recursive: true });
 
   const manifest = [];
+  const skipped = [];
 
   for (const templateId of TEMPLATE_IDS) {
-    const yamlPath = path.resolve(templatesRoot, `${templateId}.notebook.yaml`);
-    const yamlSource = await fs.readFile(yamlPath, "utf8");
-    const document = notebookFromYaml(yamlSource);
+    try {
+      const yamlPath = path.resolve(templatesRoot, `${templateId}.notebook.yaml`);
+      const yamlSource = await fs.readFile(yamlPath, "utf8");
+      const document = notebookFromYaml(yamlSource);
 
-    const results = solveDocument(document, helpers);
-    const serializedResults = {};
-    for (const [cellId, result] of Object.entries(results)) {
-      serializedResults[cellId] = serializeResult(result);
+      const results = solveDocument(document, helpers);
+      const serializedResults = {};
+      for (const [cellId, result] of Object.entries(results)) {
+        serializedResults[cellId] = serializeResult(result);
+      }
+
+      const meta = NOTEBOOK_TEMPLATES[templateId];
+      const payload = {
+        id: templateId,
+        label: meta?.label ?? document.title,
+        description: meta?.description ?? "",
+        title: document.title,
+        document,
+        results: serializedResults
+      };
+
+      await fs.writeFile(
+        path.resolve(dataRoot, `${templateId}.json`),
+        `${JSON.stringify(payload)}\n`,
+        "utf8"
+      );
+
+      manifest.push({
+        id: templateId,
+        label: payload.label,
+        description: payload.description,
+        title: payload.title
+      });
+
+      console.log(`docs-data: ${templateId} -> src/data/${templateId}.json (${Object.keys(serializedResults).length} runs)`);
+    } catch (error) {
+      skipped.push(templateId);
+      console.warn(`docs-data: skipping ${templateId} (${error instanceof Error ? error.message : String(error)})`);
     }
-
-    const meta = NOTEBOOK_TEMPLATES[templateId];
-    const payload = {
-      id: templateId,
-      label: meta?.label ?? document.title,
-      description: meta?.description ?? "",
-      title: document.title,
-      document,
-      results: serializedResults
-    };
-
-    await fs.writeFile(
-      path.resolve(dataRoot, `${templateId}.json`),
-      `${JSON.stringify(payload)}\n`,
-      "utf8"
-    );
-
-    manifest.push({
-      id: templateId,
-      label: payload.label,
-      description: payload.description,
-      title: payload.title
-    });
-
-    console.log(`docs-data: ${templateId} -> src/data/${templateId}.json (${Object.keys(serializedResults).length} runs)`);
   }
 
   await fs.writeFile(
@@ -102,7 +111,10 @@ try {
     `${JSON.stringify(manifest, null, 2)}\n`,
     "utf8"
   );
-  console.log(`docs-data: manifest -> src/data/index.json (${manifest.length} notebooks)`);
+  console.log(
+    `docs-data: manifest -> src/data/index.json (${manifest.length} notebooks` +
+      `${skipped.length > 0 ? `, ${skipped.length} skipped: ${skipped.join(", ")}` : ""})`
+  );
 } finally {
   await viteServer.close();
 }
