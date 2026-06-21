@@ -1,0 +1,3 @@
+[submodule "moneyjs"]
+	path = moneyjs
+	url = /home/john/repos/sfcr
