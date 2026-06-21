@@ -1,9 +1,44 @@
-import { useCallback, useEffect, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 
+import { notebookToJson } from "@sfcr/notebook-core";
+import type { NotebookDocument } from "@web/notebook/types";
+import {
+  NOTEBOOK_SHARE_HASH_ROUTE,
+  NOTEBOOK_SHARE_QUERY_PARAM,
+  compressNotebookSharePayload
+} from "@web/notebook/notebookShareLink";
 import type { PublicationContentsEntry } from "@web/publication/buildPublicationViewModel";
 
-export function NotebookContents({ entries }: { entries: PublicationContentsEntry[] }) {
+const SHARE_ORIGIN = (import.meta.env.VITE_MONEYJS_SHARE_ORIGIN ?? "https://johnnewto.github.io")
+  .trim()
+  .replace(/\/$/, "");
+const SHARE_BASE_PATH = (import.meta.env.VITE_MONEYJS_SHARE_BASE ?? "/moneyjs/").trim().replace(/\/?$/, "/");
+const SHARE_MAX_COMPRESSED_LENGTH = 64_000;
+
+function buildMoneyjsShareUrl(document: NotebookDocument): { url: string } | { error: string } {
+  const nbz = compressNotebookSharePayload(notebookToJson(document));
+  if (nbz.length > SHARE_MAX_COMPRESSED_LENGTH) {
+    return {
+      error: `This notebook is too large to share as a link (${nbz.length.toLocaleString()} characters compressed; limit is ${SHARE_MAX_COMPRESSED_LENGTH.toLocaleString()}).`
+    };
+  }
+
+  const params = new URLSearchParams();
+  params.set(NOTEBOOK_SHARE_QUERY_PARAM, nbz);
+  // Hash routing keeps nbz off the HTTP request line (avoids HTTP 414 on GitHub Pages).
+  return { url: `${SHARE_ORIGIN}${SHARE_BASE_PATH}${NOTEBOOK_SHARE_HASH_ROUTE}?${params.toString()}` };
+}
+
+export function NotebookContents({
+  entries,
+  document
+}: {
+  entries: PublicationContentsEntry[];
+  document: NotebookDocument;
+}) {
   const [activeAnchorId, setActiveAnchorId] = useState<string | null>(entries[0]?.anchorId ?? null);
+  const [dialogMessage, setDialogMessage] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     if (entries.length === 0 || typeof IntersectionObserver === "undefined") {
@@ -43,6 +78,18 @@ export function NotebookContents({ entries }: { entries: PublicationContentsEntr
     return () => observer.disconnect();
   }, [entries]);
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+    if (dialogMessage && !dialog.open) {
+      dialog.showModal();
+    } else if (!dialogMessage && dialog.open) {
+      dialog.close();
+    }
+  }, [dialogMessage]);
+
   const handleNavigate = useCallback((anchorId: string, event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     window.document.getElementById(anchorId)?.scrollIntoView({
@@ -51,6 +98,16 @@ export function NotebookContents({ entries }: { entries: PublicationContentsEntr
     });
     setActiveAnchorId(anchorId);
   }, []);
+
+  const handleOpenInteractive = useCallback(() => {
+    const result = buildMoneyjsShareUrl(document);
+    if ("error" in result) {
+      setDialogMessage(result.error);
+      return;
+    }
+
+    window.open(result.url, "_blank", "noopener,noreferrer");
+  }, [document]);
 
   if (entries.length === 0) {
     return null;
@@ -80,6 +137,13 @@ export function NotebookContents({ entries }: { entries: PublicationContentsEntr
         <div className="publication-action-links publication-action-links-sidebar">
           <button
             type="button"
+            className="publication-interactive-link"
+            onClick={handleOpenInteractive}
+          >
+            Open interactive notebook ↗
+          </button>
+          <button
+            type="button"
             className="publication-print-button"
             onClick={() => window.print()}
           >
@@ -90,6 +154,18 @@ export function NotebookContents({ entries }: { entries: PublicationContentsEntr
           </a>
         </div>
       </nav>
+      <dialog
+        ref={dialogRef}
+        className="docs-share-dialog publication-no-print"
+        onClose={() => setDialogMessage(null)}
+      >
+        <p className="docs-share-dialog-message">{dialogMessage}</p>
+        <form method="dialog" className="docs-share-dialog-actions">
+          <button type="submit" className="publication-interactive-link">
+            Close
+          </button>
+        </form>
+      </dialog>
     </aside>
   );
 }

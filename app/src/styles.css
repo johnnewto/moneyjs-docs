@@ -123,3 +123,31 @@ a {
 .docs-breadcrumb a {
   text-decoration: none;
 }
+
+.docs-share-dialog {
+  max-width: min(32rem, calc(100vw - 2rem));
+  border: 1px solid var(--docs-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--docs-surface);
+  color: var(--docs-text);
+  box-shadow: 0 12px 40px rgba(28, 37, 48, 0.18);
+}
+
+.docs-share-dialog::backdrop {
+  background: rgba(28, 37, 48, 0.4);
+}
+
+.docs-share-dialog-message {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.docs-share-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+}

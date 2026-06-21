@@ -165,7 +165,9 @@ export function NotebookPage({ id }: { id: string }) {
             ) : null}
           </main>
 
-          {showContents ? <NotebookContents entries={contentsEntries} /> : null}
+          {showContents ? (
+            <NotebookContents entries={contentsEntries} document={notebook.document} />
+          ) : null}
         </div>
       </div>
     </div>
