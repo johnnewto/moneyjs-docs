@@ -2,16 +2,7 @@ import { useEffect, useState } from "react";
 
 import { GalleryPage } from "./pages/GalleryPage";
 import { NotebookPage } from "./pages/NotebookPage";
-
-type Route = { name: "gallery" } | { name: "notebook"; id: string };
-
-function parseRoute(hash: string): Route {
-  const match = /^#\/n\/([\w-]+)$/.exec(hash);
-  if (match) {
-    return { name: "notebook", id: match[1] };
-  }
-  return { name: "gallery" };
-}
+import { parseRoute, type Route } from "./route";
 
 export function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));

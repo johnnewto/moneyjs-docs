@@ -30,7 +30,7 @@ export interface LoadedNotebook {
 const notebookModules = import.meta.glob<{ default: NotebookPayload }>("./data/*.json");
 const manifestModule = import.meta.glob<{ default: ManifestEntry[] }>("./data/index.json");
 
-function rehydrateResult(serialized: SerializedResult): SimulationResult {
+export function rehydrateResult(serialized: SerializedResult): SimulationResult {
   const series: SimulationResult["series"] = {};
   for (const [name, values] of Object.entries(serialized.series)) {
     series[name] = Float64Array.from(values);

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { SimulationResult } from "@sfcr/core";
 import {
   buildPublicationContentsEntries,
   buildPublicationViewModel
@@ -23,21 +22,8 @@ import "@web/styles/publication-bundle.css";
 import "@web/styles/partials/inspector.css";
 
 import { NotebookContents } from "../components/NotebookContents";
+import { resolveMaxPeriodIndex } from "../notebookView";
 import { loadNotebook, type LoadedNotebook } from "../staticRunner";
-
-function resolveMaxPeriodIndex(getResult: (cellId: string) => SimulationResult | null, runCellIds: string[]): number {
-  let max = 0;
-  for (const cellId of runCellIds) {
-    const result = getResult(cellId);
-    if (!result) {
-      continue;
-    }
-    const lengths = Object.values(result.series).map((values) => values.length);
-    const periods = result.options.periods ?? (lengths.length > 0 ? Math.max(...lengths) : 0);
-    max = Math.max(max, Math.max(periods - 1, 0));
-  }
-  return max;
-}
 
 export function NotebookPage({ id }: { id: string }) {
   const [notebook, setNotebook] = useState<LoadedNotebook | null>(null);

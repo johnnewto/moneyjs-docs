@@ -13,6 +13,7 @@
     "dev": "pnpm --filter @sfcr/docs-site dev",
     "build": "pnpm --filter @sfcr/docs-site build",
     "preview": "pnpm --filter @sfcr/docs-site preview",
-    "typecheck": "pnpm --filter @sfcr/docs-site typecheck"
+    "typecheck": "pnpm --filter @sfcr/docs-site typecheck",
+    "test": "pnpm --filter @sfcr/docs-site test"
   }
 }

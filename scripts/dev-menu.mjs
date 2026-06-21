@@ -33,6 +33,11 @@ const commands = [
     args: ["typecheck"]
   },
   {
+    label: "Test",
+    command: "pnpm",
+    args: ["test"]
+  },
+  {
     label: "Install dependencies",
     command: "pnpm",
     args: ["install"]

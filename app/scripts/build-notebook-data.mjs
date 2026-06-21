@@ -3,6 +3,12 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createServer } from "vite";
 
+import {
+  resolveModelIdFromRunCellKey,
+  serializeResult,
+  snapshotBaseline
+} from "./notebook-data-helpers.mjs";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appRoot = path.resolve(__dirname, "..");
@@ -119,14 +125,6 @@ try {
   await viteServer.close();
 }
 
-function serializeResult(result) {
-  const series = {};
-  for (const [name, values] of Object.entries(result.series)) {
-    series[name] = Array.from(values);
-  }
-  return { ...result, series };
-}
-
 function solveDocument(document, helpers) {
   const runCells = document.cells.filter((cell) => cell.type === "run");
   const runCellsById = new Map(runCells.map((cell) => [cell.id, cell]));
@@ -167,29 +165,6 @@ function solveDocument(document, helpers) {
           helpers.resolveRunCellModelKey(document.cells, entry) === scenarioModelKey
       ) ?? null
     );
-  }
-
-  function snapshotBaseline(baseline, baselineStartPeriod) {
-    if (baselineStartPeriod == null) {
-      return baseline;
-    }
-    if (!Number.isInteger(baselineStartPeriod) || baselineStartPeriod < 1) {
-      throw new Error("baselineStartPeriod must be an integer >= 1.");
-    }
-    if (baselineStartPeriod > baseline.options.periods) {
-      throw new Error(
-        `baselineStartPeriod ${baselineStartPeriod} exceeds baseline length ${baseline.options.periods}.`
-      );
-    }
-    const series = {};
-    for (const [name, values] of Object.entries(baseline.series)) {
-      series[name] = values.slice(0, baselineStartPeriod);
-    }
-    return {
-      ...baseline,
-      options: { ...baseline.options, periods: baselineStartPeriod },
-      series
-    };
   }
 
   function solveCell(cellId) {
@@ -250,11 +225,4 @@ function solveDocument(document, helpers) {
   }
 
   return results;
-}
-
-function resolveModelIdFromRunCellKey(modelKey) {
-  if (!modelKey) {
-    return null;
-  }
-  return modelKey.replace(/^model:/, "").replace(/^cell:/, "") || null;
 }
