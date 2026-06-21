@@ -1,0 +1,125 @@
+:root {
+  color-scheme: light;
+  --docs-bg: #f6f7f9;
+  --docs-surface: #ffffff;
+  --docs-border: #e2e5ea;
+  --docs-text: #1c2530;
+  --docs-muted: #5a6675;
+  --docs-accent: #2f6fed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--docs-bg);
+  color: var(--docs-text);
+}
+
+a {
+  color: var(--docs-accent);
+}
+
+.docs-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.docs-header {
+  margin-bottom: 2.5rem;
+}
+
+.docs-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--docs-muted);
+}
+
+.docs-title {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 2rem;
+}
+
+.docs-lede {
+  margin: 0;
+  color: var(--docs-muted);
+  max-width: 60ch;
+}
+
+.docs-status {
+  color: var(--docs-muted);
+}
+
+.docs-gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.docs-card {
+  border: 1px solid var(--docs-border);
+  border-radius: 12px;
+  background: var(--docs-surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.docs-card:hover {
+  border-color: var(--docs-accent);
+  box-shadow: 0 6px 24px rgba(47, 111, 237, 0.12);
+}
+
+.docs-card-link {
+  display: block;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.docs-card-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  color: var(--docs-accent);
+}
+
+.docs-card-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--docs-muted);
+  line-height: 1.5;
+}
+
+.docs-notebook {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  background: var(--docs-surface);
+  min-height: 100vh;
+}
+
+/* Let the reused publication shell fill the wider docs container
+   instead of its built-in 1170px cap. */
+.docs-notebook .publication-header,
+.docs-notebook .publication-page-shell,
+.docs-notebook .publication-footer {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.docs-breadcrumb {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.docs-breadcrumb a {
+  text-decoration: none;
+}
