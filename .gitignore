@@ -1,0 +1,4 @@
+node_modules
+.pnpm-store
+app/dist
+app/src/data

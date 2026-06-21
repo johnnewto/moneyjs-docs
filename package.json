@@ -1,0 +1,17 @@
+{
+  "name": "moneyjs-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.8.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "scripts": {
+    "build:data": "pnpm --filter @sfcr/docs-site build:data",
+    "dev": "pnpm --filter @sfcr/docs-site dev",
+    "build": "pnpm --filter @sfcr/docs-site build",
+    "preview": "pnpm --filter @sfcr/docs-site preview",
+    "typecheck": "pnpm --filter @sfcr/docs-site typecheck"
+  }
+}

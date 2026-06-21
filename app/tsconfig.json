@@ -1,0 +1,16 @@
+{
+  "extends": "../moneyjs/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["vite/client"],
+    "paths": {
+      "@sfcr/core": ["../moneyjs/packages/core/src/index.ts"],
+      "@sfcr/notebook-core": ["../moneyjs/packages/notebook-core/src/index.ts"],
+      "@web/*": ["../moneyjs/packages/web/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

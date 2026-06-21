@@ -1,0 +1,6 @@
+packages:
+  - "app"
+  - "moneyjs/packages/core"
+  - "moneyjs/packages/core-worker"
+  - "moneyjs/packages/notebook-core"
+  - "moneyjs/packages/web"

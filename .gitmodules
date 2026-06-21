@@ -1,3 +1,4 @@
 [submodule "moneyjs"]
 	path = moneyjs
-	url = /home/john/repos/sfcr
+	url = https://github.com/johnnewto/moneyjs.git
+	branch = main
