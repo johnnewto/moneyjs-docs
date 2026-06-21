@@ -9,7 +9,9 @@ cells:
   - markdown:
       id: intro
       title: Overview
-      source: This browser notebook adapts the BMW vignette into executable model, run, and chart cells. It focuses on a Newton baseline and two scenario comparisons.
+      source: >
+        This browser notebook adapts the BMW vignette into executable model, run, 
+        and chart cells. It focuses on a Newton baseline and two scenario comparisons.
   - matrix:
       id: balance-sheet
       accountingKind: balance-sheet

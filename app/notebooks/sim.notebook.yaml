@@ -9,7 +9,10 @@ cells:
   - markdown:
       id: intro
       title: Overview
-      source: This notebook implements the SIM model from Godley and Lavoie chapter 3. It includes the baseline model, a government-spending shock scenario, accounting matrices, and result views for the main income, consumption, and stock variables.
+      source: >
+        This notebook implements the SIM model from Godley and Lavoie chapter 3. 
+        It includes the baseline model, a government-spending shock scenario, 
+        accounting matrices, and result views for the main income, consumption, and stock variables.
   - matrix:
       id: balance-sheet
       accountingKind: balance-sheet

@@ -9,7 +9,11 @@ cells:
   - markdown:
       id: intro
       title: Overview
-      source: This notebook ports Marco Veronese Passarella's Model IO-PC from the Six Lectures on SFC Models course (`references/six_lectures_on_sfc_models/IOPC_model.R`). It extends Godley and Lavoie Model PC with a two-industry input-output structure, fixed sectoral prices, and an inflation-tax consumption block.
+      source: >
+        This notebook ports Marco Veronese Passarella's Model IO-PC from the Six Lectures on 
+        SFC Models course (`references/six_lectures_on_sfc_models/IOPC_model.R`). 
+        It extends Godley and Lavoie Model PC with a two-industry input-output structure, 
+        fixed sectoral prices, and an inflation-tax consumption block.
   - matrix:
       id: balance-sheet
       sourceRunCellId: baseline-run
