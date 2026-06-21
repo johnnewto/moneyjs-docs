@@ -10,11 +10,7 @@ import { mergePublicationVariableInteraction } from "@web/publication/publicatio
 import { buildPublicationVariableDescriptions } from "@web/publication/publicationVariables";
 import { buildNotebookVariableUnitMetadata } from "@web/notebook/notebookAppHelpers";
 import type { NotebookTemplateId } from "@web/notebook/templates";
-import "@web/styles/partials/tokens.css";
-import "@web/styles/partials/shared-components.css";
-import "@web/styles/partials/results-charts.css";
-import "@web/styles/partials/misc.css";
-import "@web/styles/partials/publication.css";
+import "@web/styles/publication-bundle.css";
 
 import { NotebookContents } from "../components/NotebookContents";
 import { loadNotebook, type LoadedNotebook } from "../staticRunner";
