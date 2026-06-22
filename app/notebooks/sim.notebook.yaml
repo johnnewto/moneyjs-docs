@@ -188,3 +188,57 @@ cells:
         - TXd
         - Hs
       sourceRunCellId: scenario-run
+  - markdown:
+      id: growth-note
+      title: "Appendix 3.4: Government deficits in a growing economy"
+      source: >
+        Appendix 3.4 of Godley and Lavoie asks whether sustained government
+        deficits are a problem. In a *growing* economy they are normal: if
+        government expenditure grows at a constant rate `g`, all stocks and flows
+        eventually grow at `g`, the stock of money (government debt) grows at `g`
+        too, and the government therefore runs a *permanent* deficit while the
+        debt-to-income ratio settles at a constant level. Here `Gd` grows at 3%
+        per period, starting from the stationary baseline.
+  - run:
+      id: growth-run
+      title: "Appendix 3.4: government spending growing at 3%"
+      mode: scenario
+      scenario:
+        shocks:
+          - rangeInclusive:
+              - 1
+              - 60
+            variables:
+              Gd:
+                kind: series
+                values: [20, 20.6, 21.218, 21.8545, 22.5102, 23.1855, 23.881, 24.5975, 25.3354, 26.0955, 26.8783, 27.6847, 28.5152, 29.3707, 30.2518, 31.1593, 32.0941, 33.057, 34.0487, 35.0701, 36.1222, 37.2059, 38.3221, 39.4717, 40.6559, 41.8756, 43.1318, 44.4258, 45.7586, 47.1313, 48.5452, 50.0016, 51.5017, 53.0467, 54.6381, 56.2772, 57.9656, 59.7045, 61.4957, 63.3405, 65.2408, 67.198, 69.2139, 71.2903, 73.429, 75.6319, 77.9009, 80.2379, 82.645, 85.1244, 87.6781, 90.3085, 93.0177, 95.8082, 98.6825, 101.643, 104.6923, 107.833, 111.068, 114.4001]
+      baselineRunCellId: baseline-run
+      periods: 60
+      resultKey: sim_growth_gd_3pc
+      sourceModelId: sim
+      description: Government expenditure grows at 3% per period, taking the economy onto a steady-growth path with a permanent deficit and a constant debt-to-income ratio.
+  - chart:
+      id: growth-chart
+      title: "Appendix 3.4: output, spending, taxes, and money under growth"
+      variables:
+        - Y
+        - Gd
+        - TXd
+        - Hh
+      axisMode: separate
+      referenceTrace: none
+      timeRangeInclusive:
+        - 1
+        - 60
+      sourceRunCellId: growth-run
+  - table:
+      id: growth-table
+      title: "Appendix 3.4: growing-economy summary"
+      variables:
+        - Gd
+        - TXd
+        - Y
+        - YD
+        - Hh
+        - Hs
+      sourceRunCellId: growth-run
