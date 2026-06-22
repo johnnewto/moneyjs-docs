@@ -159,6 +159,85 @@ a {
   max-width: min(28rem, calc(100vw - 2rem));
 }
 
+/* Matrix graph popup chart layout. These live in moneyjs notebook.css, which is
+   not part of the publication bundle, so they are restated here for the docs. */
+.notebook-graph-rail-chart-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.notebook-graph-rail-chart .result-panel {
+  margin-bottom: 0;
+}
+
+/* Chart heading action buttons (pin / remove / legend mode) inside the matrix
+   graph popup. Their box styling lives in moneyjs layout.css, which the
+   publication bundle intentionally excludes, so it is restated here scoped to
+   the popup to avoid leaking into other docs chrome. */
+.publication-graph-popup .panel-header .result-chart-pin-button,
+.publication-graph-popup .panel-header .result-chart-dismiss-button,
+.publication-graph-popup .panel-header .result-chart-legend-mode-button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  display: inline-flex;
+  height: 1.5rem;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.publication-graph-popup .panel-header .result-chart-legend-mode-button {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  min-width: 2.75rem;
+  padding: 0 0.35rem;
+  width: auto;
+}
+
+.publication-graph-popup .panel-header .result-chart-pin-button,
+.publication-graph-popup .panel-header .result-chart-dismiss-button {
+  width: 1.5rem;
+}
+
+.publication-graph-popup .panel-header .result-chart-pin-button:hover,
+.publication-graph-popup .panel-header .result-chart-dismiss-button:hover,
+.publication-graph-popup .panel-header .result-chart-legend-mode-button:hover,
+.publication-graph-popup .panel-header .result-chart-pin-button:focus-visible,
+.publication-graph-popup .panel-header .result-chart-dismiss-button:focus-visible,
+.publication-graph-popup .panel-header .result-chart-legend-mode-button:focus-visible {
+  background: rgba(20, 33, 61, 0.06);
+  outline: none;
+  transform: none;
+}
+
+.publication-graph-popup .panel-header .result-chart-legend-mode-button[aria-pressed="true"] {
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+}
+
+.publication-graph-popup .panel-header .result-chart-pin-button[aria-pressed="true"] {
+  color: #b45309;
+}
+
+.publication-graph-popup .panel-header .result-chart-dismiss-button:hover,
+.publication-graph-popup .panel-header .result-chart-dismiss-button:focus-visible {
+  color: var(--color-text);
+}
+
+.publication-graph-popup .panel-header .result-chart-pin-button svg,
+.publication-graph-popup .panel-header .result-chart-dismiss-button svg {
+  display: block;
+  height: 0.95rem;
+  width: 0.95rem;
+}
+
 /* Inline "[more]" disclosure on a section heading row. */
 .docs-more-row {
   display: flex;

@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   buildPublicationContentsEntries,
   buildPublicationViewModel
 } from "@web/publication/buildPublicationViewModel";
-import { PublicationCellView } from "@web/publication/PublicationCellView";
 import { PublicationAppendixSection } from "@web/publication/components/PublicationAppendix";
 import {
   buildPublicationInspectRequest,
@@ -13,15 +12,30 @@ import {
   type PublicationVariableInteraction
 } from "@web/publication/publicationInspect";
 import { PublicationVariableInspectorPopup } from "@web/publication/PublicationVariableInspectorPopup";
+import { PublicationMatrixGraphPopup } from "@web/publication/PublicationMatrixGraphPopup";
 import { buildPublicationVariableDescriptions } from "@web/publication/publicationVariables";
 import { buildNotebookVariableUnitMetadata } from "@web/notebook/notebookAppHelpers";
-import type { NotebookCell } from "@web/notebook/types";
+import {
+  addMatrixGraphChartSeries,
+  applyMatrixGraphRequest,
+  removeMatrixGraphChart,
+  removeMatrixGraphChartSeries,
+  toggleMatrixGraphChartLegendMode,
+  toggleMatrixGraphChartPin,
+  type MatrixGraphChartEntry
+} from "@web/notebook/matrixGraphRailState";
+import {
+  collectMatrixGraphSliceSeries,
+  type MatrixGraphRequest
+} from "@web/notebook/matrixSliceGraph";
+import type { MatrixCell, NotebookCell } from "@web/notebook/types";
 import type { NotebookTemplateId } from "@web/notebook/templates";
 import { useInspectorVariableHistory } from "@web/hooks/useInspectorVariableHistory";
 import { isSameInspectorContext, type VariableInspectRequest } from "@web/lib/variableInspect";
 import "@web/styles/publication-bundle.css";
 import "@web/styles/partials/inspector.css";
 
+import { DocsCellView } from "../components/DocsCellView";
 import { NotebookContents } from "../components/NotebookContents";
 import { SectionWithMore } from "../components/SectionWithMore";
 import { resolveMaxPeriodIndex } from "../notebookView";
@@ -89,6 +103,74 @@ export function NotebookPage({ id }: { id: string }) {
 
   const [inspectorContext, setInspectorContext] = useState<VariableInspectRequest | null>(null);
   const inspectorHistory = useInspectorVariableHistory();
+
+  const [matrixGraphCharts, setMatrixGraphCharts] = useState<MatrixGraphChartEntry[]>([]);
+  const matrixGraphChartIdRef = useRef(0);
+
+  const handleMatrixGraphRequest = useCallback((request: MatrixGraphRequest) => {
+    setMatrixGraphCharts((current) =>
+      applyMatrixGraphRequest(current, request, () => {
+        matrixGraphChartIdRef.current += 1;
+        return `docs-matrix-graph-${matrixGraphChartIdRef.current}`;
+      })
+    );
+  }, []);
+
+  const handleToggleMatrixGraphChartPin = useCallback((chartId: string) => {
+    setMatrixGraphCharts((current) => toggleMatrixGraphChartPin(current, chartId));
+  }, []);
+
+  const handleToggleMatrixGraphChartLegendMode = useCallback((chartId: string) => {
+    setMatrixGraphCharts((current) => toggleMatrixGraphChartLegendMode(current, chartId));
+  }, []);
+
+  const handleDismissMatrixGraphChart = useCallback((chartId: string) => {
+    setMatrixGraphCharts((current) => removeMatrixGraphChart(current, chartId));
+  }, []);
+
+  const handleRemoveMatrixGraphChartSeries = useCallback((chartId: string, source: string) => {
+    setMatrixGraphCharts((current) => removeMatrixGraphChartSeries(current, chartId, source));
+  }, []);
+
+  const handleCloseMatrixGraph = useCallback(() => {
+    setMatrixGraphCharts([]);
+  }, []);
+
+  const handleAddMatrixGraphChartSeries = useCallback(
+    (chartId: string, source: string) => {
+      if (!notebook) {
+        return;
+      }
+
+      setMatrixGraphCharts((charts) => {
+        const chart = charts.find((entry) => entry.id === chartId);
+        if (!chart) {
+          return charts;
+        }
+
+        const matrixCell = notebook.document.cells.find(
+          (cell): cell is MatrixCell => cell.type === "matrix" && cell.id === chart.matrixCellId
+        );
+        const result = notebook.getResult(chart.sourceRunCellId);
+        if (!matrixCell || !result) {
+          return charts;
+        }
+
+        const sliceEntry = collectMatrixGraphSliceSeries(
+          matrixCell,
+          chart.kind,
+          chart.index,
+          result
+        ).find((entry) => entry.source === source);
+        if (!sliceEntry) {
+          return charts;
+        }
+
+        return addMatrixGraphChartSeries(charts, chartId, sliceEntry);
+      });
+    },
+    [notebook]
+  );
 
   const handleInspectRequest = useCallback(
     (request: VariableInspectRequest) => {
@@ -209,11 +291,12 @@ export function NotebookPage({ id }: { id: string }) {
 
               if (!extraSource) {
                 return (
-                  <PublicationCellView
+                  <DocsCellView
                     key={section.anchorId}
                     cells={notebook.document.cells}
                     getResult={notebook.getResult}
                     interaction={interaction}
+                    onRequestMatrixGraph={handleMatrixGraphRequest}
                     section={section}
                     selectedPeriodIndex={selectedPeriodIndex}
                   />
@@ -227,10 +310,11 @@ export function NotebookPage({ id }: { id: string }) {
                   extraSource={extraSource}
                   interaction={interaction}
                 >
-                  <PublicationCellView
+                  <DocsCellView
                     cells={notebook.document.cells}
                     getResult={notebook.getResult}
                     interaction={interaction}
+                    onRequestMatrixGraph={handleMatrixGraphRequest}
                     section={section}
                     selectedPeriodIndex={selectedPeriodIndex}
                     showHeading={false}
@@ -248,11 +332,12 @@ export function NotebookPage({ id }: { id: string }) {
 
                   if (!extraSource) {
                     return (
-                      <PublicationCellView
+                      <DocsCellView
                         key={section.anchorId}
                         cells={notebook.document.cells}
                         getResult={notebook.getResult}
                         interaction={interaction}
+                        onRequestMatrixGraph={handleMatrixGraphRequest}
                         section={section}
                         selectedPeriodIndex={selectedPeriodIndex}
                       />
@@ -295,6 +380,21 @@ export function NotebookPage({ id }: { id: string }) {
           onGoBack={handleInspectorGoBack}
           onGoForward={handleInspectorGoForward}
           onSelectVariable={handleInspectorSelectVariable}
+          selectedPeriodIndex={selectedPeriodIndex}
+        />
+      ) : null}
+
+      {matrixGraphCharts.length > 0 ? (
+        <PublicationMatrixGraphPopup
+          cells={notebook.document.cells}
+          charts={matrixGraphCharts}
+          getResult={notebook.getResult}
+          onAddChartSeries={handleAddMatrixGraphChartSeries}
+          onClose={handleCloseMatrixGraph}
+          onDismissChart={handleDismissMatrixGraphChart}
+          onRemoveChartSeries={handleRemoveMatrixGraphChartSeries}
+          onToggleChartLegendMode={handleToggleMatrixGraphChartLegendMode}
+          onToggleChartPin={handleToggleMatrixGraphChartPin}
           selectedPeriodIndex={selectedPeriodIndex}
         />
       ) : null}
