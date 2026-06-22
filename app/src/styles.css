@@ -160,15 +160,10 @@ a {
 }
 
 /* Inline "[more]" disclosure on a section heading row. */
-.docs-heading-row {
+.docs-more-row {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
-}
-
-.docs-heading-row .publication-section-heading {
-  margin-bottom: 0;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
 }
 
 .docs-more-toggle {

@@ -22,24 +22,13 @@ export function SectionWithMore({
   headingClassName?: string;
   wrapperClassName?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const panelId = useId();
   const hasTitle = title.trim().length > 0;
 
   return (
     <div className={wrapperClassName} id={anchorId}>
-      <div className="docs-heading-row">
-        {hasTitle ? <HeadingTag className={headingClassName}>{title}</HeadingTag> : null}
-        <button
-          type="button"
-          className="docs-more-toggle publication-no-print"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? "less" : "more"}
-        </button>
-      </div>
+      {hasTitle ? <HeadingTag className={headingClassName}>{title}</HeadingTag> : null}
       {children}
       {open ? (
         <div id={panelId} className="docs-more-panel">
@@ -54,6 +43,17 @@ export function SectionWithMore({
           />
         </div>
       ) : null}
+      <div className="docs-more-row">
+        <button
+          type="button"
+          className="docs-more-toggle publication-no-print"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "less" : "more"}
+        </button>
+      </div>
     </div>
   );
 }
