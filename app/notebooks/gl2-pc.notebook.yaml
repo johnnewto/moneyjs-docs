@@ -206,6 +206,38 @@ cells:
       axisSnapTolarance: 0.5
       sourceRunCellId: scenario-1-run
   - markdown:
+      id: scenario-2-note
+      title: Higher propensity to consume
+      source: "This scenario raises the propensity to consume out of income `alpha1` from `0.6` to `0.7` between periods 5 and 60 on the baseline PC model, reproducing Godley & Lavoie's third chapter-4 experiment on the model without expectations."
+  - run:
+      id: scenario-2-run
+      title: "Scenario 2: higher propensity to consume"
+      mode: scenario
+      scenario:
+        shocks:
+          - rangeInclusive:
+              - 5
+              - 60
+            variables:
+              alpha1:
+                kind: constant
+                value: 0.7
+      baselineRunCellId: baseline-run
+      periods: 60
+      resultKey: gl2_pc_s2
+      sourceModelId: pc-baseline
+  - chart:
+      id: scenario-2-chart
+      title: Scenario 2 income and wealth
+      variables:
+        - Y
+        - C
+        - YD
+        - V
+      axisMode: separate
+      axisSnapTolarance: 0.5
+      sourceRunCellId: scenario-2-run
+  - markdown:
       id: pcex1-note
       title: PCEX1
       source: This section mirrors the random-shock experiment from `gl2-pc.Rmd`, but uses a fixed stored `Ra` sequence instead of runtime randomness so that browser regressions remain deterministic.
