@@ -1,0 +1,47 @@
+---
+description: Conventions for authoring docs-site notebooks and their sidecar markdown
+globs: app/notebooks/**
+alwaysApply: false
+---
+
+# Docs notebook conventions
+
+`app/notebooks/<id>.notebook.yaml` is the notebook; `app/notebooks/<id>.md` is its
+sidecar of collapsible "[more]" explanations. These are auto-discovered and solved
+by `app/scripts/build-notebook-data.mjs` — they are **not** moneyjs pilot templates,
+so the submodule's `compile:notebook-yaml` does not apply. Never edit `moneyjs/` or
+the generated `app/src/data/`.
+
+## Sidecar markers
+
+Each panel starts with a marker on its own line; text runs until the next marker:
+
+```
+<!-- more: <cellId> -->
+```
+
+- `<cellId>` must match a cell `id` in the YAML (unknown ids are skipped with a
+  warning); one block per id, last wins.
+
+## Rendering: no KaTeX
+
+Panels render via `AssistantMarkdown` (no `remark-math`). Use backticks, not LaTeX:
+
+- ✅ `` `Y = Cs + Gs` `` and `` `alpha1` ``
+- ❌ `$Y = C_s + G_s$`
+- Use `pow(b, e)`, never `^`, for exponentiation.
+
+## Cells & scenarios
+
+- One wrapper key per cell (`markdown`/`matrix`/`run`/`chart`/`table`/…); no `type`.
+- `chart`/`table` `variables` are bare model variable names, not expressions.
+- Scenario runs start from the baseline's last-period state; shocks (`constant` or
+  `series`) apply over `rangeInclusive` and target **externals** only. A `series`
+  maps `values[period - start]`. For growth, drive an external with a geometric
+  `series`.
+
+## Validation
+
+Run `pnpm build:data` (solves every notebook — watch for `unknown cell id` and
+`failed to solve` warnings), then `pnpm test`. `pnpm typecheck` currently fails on
+pre-existing submodule errors, so it is not a reliable gate for notebook changes.
