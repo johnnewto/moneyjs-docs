@@ -5,6 +5,7 @@ import {
   buildPublicationViewModel
 } from "@web/publication/buildPublicationViewModel";
 import { PublicationCellView } from "@web/publication/PublicationCellView";
+import { PublicationAppendixSection } from "@web/publication/components/PublicationAppendix";
 import {
   buildPublicationInspectRequest,
   mergePublicationVariableInteraction,
@@ -22,6 +23,7 @@ import "@web/styles/publication-bundle.css";
 import "@web/styles/partials/inspector.css";
 
 import { NotebookContents } from "../components/NotebookContents";
+import { SectionWithMore } from "../components/SectionWithMore";
 import { resolveMaxPeriodIndex } from "../notebookView";
 import { loadNotebook, type LoadedNotebook } from "../staticRunner";
 
@@ -201,30 +203,77 @@ export function NotebookPage({ id }: { id: string }) {
           }`}
         >
           <main className="publication-main">
-            {viewModel.bodySections.map((section) => (
-              <PublicationCellView
-                key={section.anchorId}
-                cells={notebook.document.cells}
-                getResult={notebook.getResult}
-                interaction={buildCellInteraction(section.cell)}
-                section={section}
-                selectedPeriodIndex={selectedPeriodIndex}
-              />
-            ))}
+            {viewModel.bodySections.map((section) => {
+              const interaction = buildCellInteraction(section.cell);
+              const extraSource = notebook.extrasByCellId.get(section.anchorId);
 
-            {viewModel.appendixSections.length > 0 ? (
-              <section className="publication-appendix publication-page-break-before">
-                <h2 className="publication-appendix-title">Appendix</h2>
-                {viewModel.appendixSections.map((section) => (
+              if (!extraSource) {
+                return (
                   <PublicationCellView
                     key={section.anchorId}
                     cells={notebook.document.cells}
                     getResult={notebook.getResult}
-                    interaction={buildCellInteraction(section.cell)}
+                    interaction={interaction}
                     section={section}
                     selectedPeriodIndex={selectedPeriodIndex}
                   />
-                ))}
+                );
+              }
+
+              return (
+                <SectionWithMore
+                  key={section.anchorId}
+                  title={section.cell.title}
+                  extraSource={extraSource}
+                  interaction={interaction}
+                >
+                  <PublicationCellView
+                    cells={notebook.document.cells}
+                    getResult={notebook.getResult}
+                    interaction={interaction}
+                    section={section}
+                    selectedPeriodIndex={selectedPeriodIndex}
+                    showHeading={false}
+                  />
+                </SectionWithMore>
+              );
+            })}
+
+            {viewModel.appendixSections.length > 0 ? (
+              <section className="publication-appendix publication-page-break-before">
+                <h2 className="publication-appendix-title">Appendix</h2>
+                {viewModel.appendixSections.map((section) => {
+                  const interaction = buildCellInteraction(section.cell);
+                  const extraSource = notebook.extrasByCellId.get(section.anchorId);
+
+                  if (!extraSource) {
+                    return (
+                      <PublicationCellView
+                        key={section.anchorId}
+                        cells={notebook.document.cells}
+                        getResult={notebook.getResult}
+                        interaction={interaction}
+                        section={section}
+                        selectedPeriodIndex={selectedPeriodIndex}
+                      />
+                    );
+                  }
+
+                  return (
+                    <SectionWithMore
+                      key={section.anchorId}
+                      anchorId={section.anchorId}
+                      title={section.cell.title}
+                      extraSource={extraSource}
+                      interaction={interaction}
+                      headingTag="h3"
+                      headingClassName="publication-appendix-heading"
+                      wrapperClassName="publication-section publication-section-appendix docs-section-with-more"
+                    >
+                      <PublicationAppendixSection cell={section.cell} />
+                    </SectionWithMore>
+                  );
+                })}
               </section>
             ) : null}
           </main>

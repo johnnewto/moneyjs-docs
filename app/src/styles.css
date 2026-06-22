@@ -158,3 +158,66 @@ a {
   width: min(28rem, calc(100vw - 2rem));
   max-width: min(28rem, calc(100vw - 2rem));
 }
+
+/* Inline "[more]" disclosure on a section heading row. */
+.docs-heading-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+
+.docs-heading-row .publication-section-heading {
+  margin-bottom: 0;
+}
+
+.docs-more-toggle {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--docs-accent);
+  cursor: pointer;
+}
+
+.docs-more-toggle::before {
+  content: "[";
+}
+
+.docs-more-toggle::after {
+  content: "]";
+}
+
+.docs-more-toggle:hover {
+  text-decoration: underline;
+}
+
+.docs-more-toggle:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.docs-more-panel {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--docs-border);
+  background: var(--docs-bg);
+  border-radius: 0 8px 8px 0;
+}
+
+.docs-more-panel img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* The toggle is hidden in print (publication-no-print); an expanded panel
+   still prints, just without the screen-only background tint. */
+@media print {
+  .docs-more-panel {
+    background: transparent;
+  }
+}
