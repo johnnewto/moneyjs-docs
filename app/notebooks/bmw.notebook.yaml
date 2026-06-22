@@ -166,8 +166,9 @@ cells:
       note: This chart shows the time paths of selected variables in the baseline run, which serves as the reference for the scenario comparisons.
       variables:
         - Y
+        - YD
         - Cd
-        - Mh
+        - Id
         - W
       axisMode: separate
       axisSnapTolarance: 0.1
@@ -180,11 +181,13 @@ cells:
       description: This table shows the values of key variables in the baseline run across all periods.
       variables:
         - Y
-        - Cd
         - Id
+        - DA
         - K
+        - Ld
+        - Ls
         - Mh
-        - W
+        - Ms
       sourceRunCellId: baseline-newton
   - markdown:
       id: scenario-1-note
@@ -212,12 +215,12 @@ cells:
       baselineStartPeriod: 40
   - chart:
       id: scenario-1-chart
-      title: Scenario 1 consumption and income
+      title: "Scenario 1: output, investment and stocks"
       variables:
         - Cd
-        - YD
         - Id
-        - AF
+        - K
+        - W
       axisMode: separate
       axisSnapTolarance: 0.1
       niceScale: true
