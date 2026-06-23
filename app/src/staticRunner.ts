@@ -12,11 +12,6 @@ interface SerializedResult extends Omit<SimulationResult, "series"> {
   series: Record<string, number[]>;
 }
 
-export interface NotebookExtra {
-  cellId: string;
-  source: string;
-}
-
 interface NotebookPayload {
   id: string;
   label: string;
@@ -24,14 +19,12 @@ interface NotebookPayload {
   title: string;
   document: NotebookDocument;
   results: Record<string, SerializedResult>;
-  extras?: NotebookExtra[];
 }
 
 export interface LoadedNotebook {
   meta: ManifestEntry;
   document: NotebookDocument;
   getResult: (runCellId: string) => SimulationResult | null;
-  extrasByCellId: Map<string, string>;
 }
 
 const notebookModules = import.meta.glob<{ default: NotebookPayload }>("./data/*.json");
@@ -66,11 +59,6 @@ export async function loadNotebook(id: string): Promise<LoadedNotebook | null> {
     results.set(cellId, rehydrateResult(serialized));
   }
 
-  const extrasByCellId = new Map<string, string>();
-  for (const extra of payload.extras ?? []) {
-    extrasByCellId.set(extra.cellId, extra.source);
-  }
-
   return {
     meta: {
       id: payload.id,
@@ -79,7 +67,6 @@ export async function loadNotebook(id: string): Promise<LoadedNotebook | null> {
       title: payload.title
     },
     document: payload.document,
-    getResult: (runCellId: string) => results.get(runCellId) ?? null,
-    extrasByCellId
+    getResult: (runCellId: string) => results.get(runCellId) ?? null
   };
 }

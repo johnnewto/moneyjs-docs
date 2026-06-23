@@ -4,7 +4,6 @@ import {
   buildPublicationContentsEntries,
   buildPublicationViewModel
 } from "@web/publication/buildPublicationViewModel";
-import { PublicationAppendixSection } from "@web/publication/components/PublicationAppendix";
 import {
   buildPublicationInspectRequest,
   mergePublicationVariableInteraction,
@@ -37,13 +36,38 @@ import "@web/styles/partials/inspector.css";
 
 import { DocsCellView } from "../components/DocsCellView";
 import { NotebookContents } from "../components/NotebookContents";
-import { SectionWithMore } from "../components/SectionWithMore";
 import { resolveMaxPeriodIndex } from "../notebookView";
 import { loadNotebook, type LoadedNotebook } from "../staticRunner";
+
+const WIDE_MODE_STORAGE_KEY = "docs:notebook-wide";
+
+function readStoredWideMode(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(WIDE_MODE_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 export function NotebookPage({ id }: { id: string }) {
   const [notebook, setNotebook] = useState<LoadedNotebook | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [wideMode, setWideMode] = useState<boolean>(readStoredWideMode);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(WIDE_MODE_STORAGE_KEY, wideMode ? "1" : "0");
+    } catch {
+      // Ignore persistence failures (e.g. storage disabled).
+    }
+  }, [wideMode]);
+
+  const handleToggleWideMode = useCallback(() => {
+    setWideMode((current) => !current);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -269,9 +293,21 @@ export function NotebookPage({ id }: { id: string }) {
   const showContents = contentsEntries.length > 1;
 
   return (
-    <div className="publication-root publication-mode-publish docs-notebook">
+    <div
+      className={`publication-root publication-mode-publish docs-notebook${
+        wideMode ? " docs-notebook--full" : ""
+      }`}
+    >
       <nav className="docs-breadcrumb publication-no-print">
         <a href="#/">← All notebooks</a>
+        <button
+          type="button"
+          className="docs-width-toggle"
+          aria-pressed={wideMode}
+          onClick={handleToggleWideMode}
+        >
+          {wideMode ? "Standard width" : "Wide width"}
+        </button>
       </nav>
       <header className="publication-header">
         <p className="publication-eyebrow">MoneyJS publication</p>
@@ -285,80 +321,32 @@ export function NotebookPage({ id }: { id: string }) {
           }`}
         >
           <main className="publication-main">
-            {viewModel.bodySections.map((section) => {
-              const interaction = buildCellInteraction(section.cell);
-              const extraSource = notebook.extrasByCellId.get(section.anchorId);
-
-              if (!extraSource) {
-                return (
-                  <DocsCellView
-                    key={section.anchorId}
-                    cells={notebook.document.cells}
-                    getResult={notebook.getResult}
-                    interaction={interaction}
-                    onRequestMatrixGraph={handleMatrixGraphRequest}
-                    section={section}
-                    selectedPeriodIndex={selectedPeriodIndex}
-                  />
-                );
-              }
-
-              return (
-                <SectionWithMore
-                  key={section.anchorId}
-                  title={section.cell.title}
-                  extraSource={extraSource}
-                  interaction={interaction}
-                >
-                  <DocsCellView
-                    cells={notebook.document.cells}
-                    getResult={notebook.getResult}
-                    interaction={interaction}
-                    onRequestMatrixGraph={handleMatrixGraphRequest}
-                    section={section}
-                    selectedPeriodIndex={selectedPeriodIndex}
-                    showHeading={false}
-                  />
-                </SectionWithMore>
-              );
-            })}
+            {viewModel.bodySections.map((section) => (
+              <DocsCellView
+                key={section.anchorId}
+                cells={notebook.document.cells}
+                getResult={notebook.getResult}
+                interaction={buildCellInteraction(section.cell)}
+                onRequestMatrixGraph={handleMatrixGraphRequest}
+                section={section}
+                selectedPeriodIndex={selectedPeriodIndex}
+              />
+            ))}
 
             {viewModel.appendixSections.length > 0 ? (
               <section className="publication-appendix publication-page-break-before">
                 <h2 className="publication-appendix-title">Appendix</h2>
-                {viewModel.appendixSections.map((section) => {
-                  const interaction = buildCellInteraction(section.cell);
-                  const extraSource = notebook.extrasByCellId.get(section.anchorId);
-
-                  if (!extraSource) {
-                    return (
-                      <DocsCellView
-                        key={section.anchorId}
-                        cells={notebook.document.cells}
-                        getResult={notebook.getResult}
-                        interaction={interaction}
-                        onRequestMatrixGraph={handleMatrixGraphRequest}
-                        section={section}
-                        selectedPeriodIndex={selectedPeriodIndex}
-                      />
-                    );
-                  }
-
-                  return (
-                    <SectionWithMore
-                      key={section.anchorId}
-                      anchorId={section.anchorId}
-                      title={section.cell.title}
-                      extraSource={extraSource}
-                      interaction={interaction}
-                      headingTag="h3"
-                      headingClassName="publication-appendix-heading"
-                      wrapperClassName="publication-section publication-section-appendix docs-section-with-more"
-                    >
-                      <PublicationAppendixSection cell={section.cell} />
-                    </SectionWithMore>
-                  );
-                })}
+                {viewModel.appendixSections.map((section) => (
+                  <DocsCellView
+                    key={section.anchorId}
+                    cells={notebook.document.cells}
+                    getResult={notebook.getResult}
+                    interaction={buildCellInteraction(section.cell)}
+                    onRequestMatrixGraph={handleMatrixGraphRequest}
+                    section={section}
+                    selectedPeriodIndex={selectedPeriodIndex}
+                  />
+                ))}
               </section>
             ) : null}
           </main>

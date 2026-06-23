@@ -4,6 +4,7 @@ import type { NotebookCell } from "@web/notebook/types";
 import type { PublicationSection } from "@web/publication/buildPublicationViewModel";
 import { PublicationCellView } from "@web/publication/PublicationCellView";
 import { PublicationCaption } from "@web/publication/components/PublicationCaption";
+import { PublicationMore } from "@web/publication/components/PublicationMore";
 import type { PublicationVariableInteraction } from "@web/publication/publicationInspect";
 
 import { InteractiveChart } from "./InteractiveChart";
@@ -36,6 +37,7 @@ export function DocsCellView(props: {
           selectedPeriodIndex={selectedPeriodIndex}
         />
         <PublicationCaption description={cell.description} note={cell.note} title={cell.title} />
+        {cell.more?.trim() ? <PublicationMore interaction={interaction} source={cell.more} /> : null}
       </figure>
     );
   }

@@ -76,9 +76,6 @@ try {
       const yamlSource = await fs.readFile(yamlPath, "utf8");
       const document = notebookFromYaml(yamlSource);
 
-      const mdPath = path.resolve(templatesRoot, `${templateId}.md`);
-      const extras = await readSidecarExtras(mdPath, document, templateId);
-
       const results = solveDocument(document, helpers);
       const serializedResults = {};
       for (const [cellId, result] of Object.entries(results)) {
@@ -92,8 +89,7 @@ try {
         description: meta?.description ?? "",
         title: document.title,
         document,
-        results: serializedResults,
-        extras
+        results: serializedResults
       };
 
       await fs.writeFile(
@@ -229,43 +225,4 @@ function solveDocument(document, helpers) {
   }
 
   return results;
-}
-
-async function readSidecarExtras(mdPath, document, templateId) {
-  let source;
-  try {
-    source = await fs.readFile(mdPath, "utf8");
-  } catch (error) {
-    if (error && error.code === "ENOENT") {
-      return [];
-    }
-    throw error;
-  }
-
-  const cellIds = new Set(document.cells.map((cell) => cell.id));
-  const markerPattern = /^<!--\s*more:\s*([\w-]+)\s*-->[ \t]*$/gm;
-  const matches = [...source.matchAll(markerPattern)];
-  if (matches.length === 0) {
-    return [];
-  }
-
-  // One [more] block per section: a later block for the same cell wins.
-  const byCellId = new Map();
-  for (let index = 0; index < matches.length; index += 1) {
-    const match = matches[index];
-    const cellId = match[1];
-    const start = match.index + match[0].length;
-    const end = index + 1 < matches.length ? matches[index + 1].index : source.length;
-    const fragment = source.slice(start, end).trim();
-    if (!fragment) {
-      continue;
-    }
-    if (!cellIds.has(cellId)) {
-      console.warn(`docs-data: ${templateId}.md references unknown cell id '${cellId}' (skipped)`);
-      continue;
-    }
-    byCellId.set(cellId, { cellId, source: fragment });
-  }
-
-  return [...byCellId.values()];
 }

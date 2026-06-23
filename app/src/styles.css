@@ -29,6 +29,10 @@ a {
   padding: 3rem 1.5rem 5rem;
 }
 
+.docs-shell--full {
+  max-width: none;
+}
+
 .docs-header {
   margin-bottom: 2.5rem;
 }
@@ -98,11 +102,16 @@ a {
 }
 
 .docs-notebook {
-  max-width: 1320px;
+  --docs-notebook-width: 1320px;
+  max-width: var(--docs-notebook-width);
   margin: 0 auto;
   padding: 2rem 1.5rem 5rem;
   background: var(--docs-surface);
   min-height: 100vh;
+}
+
+.docs-notebook--full {
+  --docs-notebook-width: none;
 }
 
 /* Let the reused publication shell fill the wider docs container
@@ -116,12 +125,41 @@ a {
 }
 
 .docs-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
 }
 
 .docs-breadcrumb a {
   text-decoration: none;
+}
+
+.docs-width-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--docs-muted);
+  background: var(--docs-surface);
+  border: 1px solid var(--docs-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.docs-width-toggle:hover {
+  border-color: var(--docs-accent);
+  color: var(--docs-accent);
+}
+
+.docs-width-toggle[aria-pressed="true"] {
+  border-color: var(--docs-accent);
+  color: var(--docs-accent);
 }
 
 .docs-share-dialog {
@@ -236,62 +274,4 @@ a {
   display: block;
   height: 0.95rem;
   width: 0.95rem;
-}
-
-/* Inline "[more]" disclosure on a section heading row. */
-.docs-more-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.5rem;
-}
-
-.docs-more-toggle {
-  appearance: none;
-  border: 0;
-  background: none;
-  padding: 0;
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--docs-accent);
-  cursor: pointer;
-}
-
-.docs-more-toggle::before {
-  content: "[";
-}
-
-.docs-more-toggle::after {
-  content: "]";
-}
-
-.docs-more-toggle:hover {
-  text-decoration: underline;
-}
-
-.docs-more-toggle:focus-visible {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
-  border-radius: 3px;
-}
-
-.docs-more-panel {
-  margin-top: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-left: 3px solid var(--docs-border);
-  background: var(--docs-bg);
-  border-radius: 0 8px 8px 0;
-}
-
-.docs-more-panel img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* The toggle is hidden in print (publication-no-print); an expanded panel
-   still prints, just without the screen-only background tint. */
-@media print {
-  .docs-more-panel {
-    background: transparent;
-  }
 }
