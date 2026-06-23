@@ -1,22 +1,24 @@
 ---
 name: expand-docs-notebook
-description: Expand a moneyjs-docs notebook with new sections and explanatory "[more]" panels grounded in a textbook reference. Use when adding cells to app/notebooks/<id>.notebook.yaml, writing or editing the sidecar app/notebooks/<id>.md, or replicating a Godley & Lavoie / SFC chapter or appendix into a notebook.
+description: Expand a moneyjs-docs notebook with new sections and explanatory "[more]" panels grounded in a textbook reference. Use when adding cells to app/notebooks/<id>.notebook.yaml, writing inline `more:` panels (or editing a legacy app/notebooks/<id>.md sidecar), or replicating a Godley & Lavoie / SFC chapter or appendix into a notebook.
 ---
 
 # Expand a docs-site notebook
 
 Add sections to a `moneyjs-docs` notebook: new cells in the notebook YAML plus
-matching collapsible "[more]" explanations in the sidecar markdown, with prose
-grounded in a cited reference and **verified against solved model output**.
+matching collapsible "[more]" explanations, with prose grounded in a cited
+reference and **verified against solved model output**.
 
 ## Key locations
 
 - Notebook source: `app/notebooks/<id>.notebook.yaml` (auto-discovered; **not** a
   moneyjs pilot template — the submodule's `compile:notebook-yaml` does not apply
   here).
-- Sidecar explanations: `app/notebooks/<id>.md`.
+- "[more]" explanations: **inline** `more:` fields on cells (preferred; `sim` uses
+  this), or a **legacy** `app/notebooks/<id>.md` sidecar (`bmw`, `gl2-pc`, `io-pc`).
 - Generated data (gitignored, never hand-edit): `app/src/data/<id>.json`.
-- Sidecar parser: `readSidecarExtras` in `app/scripts/build-notebook-data.mjs`.
+- Extras parsers: `readInlineExtras` (inline) and `readSidecarExtras` (sidecar) in
+  `app/scripts/build-notebook-data.mjs`; inline wins on id collisions.
 - Panel renderer: `app/src/components/SectionWithMore.tsx` →
   `@web/components/AssistantMarkdown`.
 
@@ -25,29 +27,44 @@ Do **not** edit anything under `moneyjs/` (pinned submodule).
 ## Workflow
 
 ```
-- [ ] 1. Read the notebook YAML; list existing cell ids and their order
-- [ ] 2. Read the sidecar .md; note which cell ids already have [more] blocks
-- [ ] 3. Design the new section's cells (markdown/run/chart/table)
-- [ ] 4. Add cells to the YAML
-- [ ] 5. Add matching `<!-- more: <cellId> -->` blocks to the .md
-- [ ] 6. Run `pnpm build:data`; fix any warnings
-- [ ] 7. Verify the numbers in app/src/data/<id>.json match the reference
-- [ ] 8. Run `pnpm test`
+- [ ] 1. Read the notebook YAML; list existing cell ids, their order, and which
+         already carry a `more:` panel (or a sidecar `<!-- more: -->` block)
+- [ ] 2. Design the new section's cells (markdown/run/chart/table)
+- [ ] 3. Add cells to the YAML, with an inline `more:` panel on each
+- [ ] 4. Run `pnpm build:data`; fix any warnings
+- [ ] 5. Verify the numbers in app/src/data/<id>.json match the reference
+- [ ] 6. Run `pnpm test`
 ```
 
-## Sidecar markdown rules
+## "[more]" panel rules
 
-Each explanation is introduced by a marker on its own line:
+Prefer **inline** panels: add a `more:` block scalar to the cell body in the YAML.
+The moneyjs parser ignores the field; the build script's `readInlineExtras` reads it.
+
+```yaml
+  - table:
+      id: baseline-table
+      title: Baseline summary
+      variables: [Y, YD, Hh]
+      sourceRunCellId: baseline-run
+      more: |
+        Watch `Hh` flatten as `YD - Cd` shrinks toward zero ...
+```
+
+For the **legacy sidecar** form (`bmw`, `gl2-pc`, `io-pc`), each explanation in
+`app/notebooks/<id>.md` is introduced by a marker on its own line; everything until
+the next marker becomes that cell's panel:
 
 ```
 <!-- more: <cellId> -->
 ```
 
-Everything until the next marker becomes the `[more]` panel for that cell.
+In both forms:
 
-- `<cellId>` **must** match a cell `id` in the notebook YAML. Unknown ids are
-  skipped with a `docs-data: <id>.md references unknown cell id` warning.
-- One block per cell; if an id repeats, the **last** block wins.
+- the cell id **must** match a cell `id` in the YAML; unknown ids are skipped with a
+  warning.
+- One panel per cell; if an id repeats, the **last** wins. Inline beats sidecar when
+  both define the same id.
 - Assets go in `app/public/figures/` and are referenced relatively, e.g.
   `![alt](figures/example.png)`.
 
@@ -61,6 +78,12 @@ Panels render through `AssistantMarkdown`, which has **no KaTeX / `remark-math`*
 - ✅ `` `Cd = alpha1 * YD + alpha2 * lag(Hh)` ``
 - ❌ `$C_d = \alpha_1 YD$`
 - Use `pow(b, e)` for exponentiation, never `^`.
+
+For **inline** `more:` panels, write italics as `_italic_`, not `*italic*`. The
+notebook YAML dialect scans block scalars and rejects `*word`/`&word` tokens (they
+look like YAML aliases/anchors), so a multi-word `*italic phrase*` fails to build.
+`**bold**` and ` * ` (multiplication inside backticks) are fine. Legacy `.md`
+sidecars are plain markdown and unaffected.
 
 ## Cell conventions
 
@@ -90,7 +113,8 @@ See `moneyjs/packages/core/src/engine/runScenario.ts`.
 
 `pnpm build:data` is the real gate (it solves every notebook). Watch its output:
 
-- `references unknown cell id` → a `<!-- more: -->` marker is misspelled.
+- `references unknown cell id` → a `more:` cell id or `<!-- more: -->` marker is
+  misspelled.
 - `failed to solve` / a notebook silently missing → the YAML produced an
   unsolvable model.
 

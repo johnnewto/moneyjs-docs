@@ -6,22 +6,38 @@ alwaysApply: false
 
 # Docs notebook conventions
 
-`app/notebooks/<id>.notebook.yaml` is the notebook; `app/notebooks/<id>.md` is its
-sidecar of collapsible "[more]" explanations. These are auto-discovered and solved
-by `app/scripts/build-notebook-data.mjs` — they are **not** moneyjs pilot templates,
-so the submodule's `compile:notebook-yaml` does not apply. Never edit `moneyjs/` or
-the generated `app/src/data/`.
+`app/notebooks/<id>.notebook.yaml` is the notebook. These are auto-discovered and
+solved by `app/scripts/build-notebook-data.mjs` — they are **not** moneyjs pilot
+templates, so the submodule's `compile:notebook-yaml` does not apply. Never edit
+`moneyjs/` or the generated `app/src/data/`.
 
-## Sidecar markers
+## Collapsible "[more]" panels
 
-Each panel starts with a marker on its own line; text runs until the next marker:
+Each cell can carry a collapsible "[more]" explanation. Two sources feed them; if
+both define the same cell id, **inline wins**.
+
+**Inline (preferred — `sim` uses this).** Add a `more:` block scalar to the cell
+body in the YAML. The moneyjs parser ignores the field; the build script reads it:
+
+```yaml
+  - chart:
+      id: baseline-chart
+      title: Baseline
+      variables: [Y, YD]
+      sourceRunCellId: baseline-run
+      more: |
+        Output `Y` converges to `Y* = Gd / theta = 100` ...
+```
+
+**Sidecar (legacy — `bmw`, `gl2-pc`, `io-pc`).** A separate `app/notebooks/<id>.md`
+where each panel starts with a marker on its own line; text runs to the next marker:
 
 ```
 <!-- more: <cellId> -->
 ```
 
-- `<cellId>` must match a cell `id` in the YAML (unknown ids are skipped with a
-  warning); one block per id, last wins.
+In both cases `<cellId>` must match a cell `id` in the YAML (unknown ids are skipped
+with a warning); one block per id, last wins.
 
 ## Rendering: no KaTeX
 
@@ -30,6 +46,11 @@ Panels render via `AssistantMarkdown` (no `remark-math`). Use backticks, not LaT
 - ✅ `` `Y = Cs + Gs` `` and `` `alpha1` ``
 - ❌ `$Y = C_s + G_s$`
 - Use `pow(b, e)`, never `^`, for exponentiation.
+
+In **inline** `more:` panels, write italics as `_italic_`, not `*italic*`: the
+notebook YAML dialect scans block scalars and rejects `*word`/`&word` tokens
+(they look like aliases/anchors). `**bold**` and ` * ` (multiplication in
+backticks) are fine. Sidecar `.md` files are unaffected.
 
 ## Cells & scenarios
 
