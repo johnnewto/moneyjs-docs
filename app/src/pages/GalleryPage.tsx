@@ -18,7 +18,7 @@ export function GalleryPage() {
   }, []);
 
   return (
-    <div className="docs-shell">
+    <div className="docs-shell docs-shell--full">
       <header className="docs-header">
         <p className="docs-eyebrow">MoneyJS</p>
         <h1 className="docs-title">Notebook documentation</h1>
