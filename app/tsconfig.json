@@ -8,6 +8,7 @@
     "types": ["vite/client"],
     "paths": {
       "@sfcr/core": ["../moneyjs/packages/core/src/index.ts"],
+      "@sfcr/core-worker": ["../moneyjs/packages/core-worker/src/index.ts"],
       "@sfcr/notebook-core": ["../moneyjs/packages/notebook-core/src/index.ts"],
       "@web/*": ["../moneyjs/packages/web/src/*"]
     }
