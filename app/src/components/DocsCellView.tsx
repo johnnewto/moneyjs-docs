@@ -1,4 +1,5 @@
 import type { SimulationResult } from "@sfcr/core";
+import type { MatrixEntryDisplayMode } from "@web/notebook/matrixEntryDisplay";
 import type { MatrixGraphRequest } from "@web/notebook/matrixSliceGraph";
 import type { NotebookCell } from "@web/notebook/types";
 import type { PublicationSection } from "@web/publication/buildPublicationViewModel";
@@ -15,6 +16,8 @@ export function DocsCellView(props: {
   cells: NotebookCell[];
   getResult(runCellId: string): SimulationResult | null;
   interaction: PublicationVariableInteraction;
+  matrixEntryDisplayMode?: MatrixEntryDisplayMode;
+  onMatrixEntryDisplayModeChange?(mode: MatrixEntryDisplayMode): void;
   onRequestMatrixGraph?(request: MatrixGraphRequest): void;
   section: PublicationSection;
   selectedPeriodIndex: number;

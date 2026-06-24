@@ -27,6 +27,8 @@ import {
   collectMatrixGraphSliceSeries,
   type MatrixGraphRequest
 } from "@web/notebook/matrixSliceGraph";
+import { type MatrixEntryDisplayMode } from "@web/notebook/matrixEntryDisplay";
+import { PeriodScrubber } from "@web/components/PeriodScrubber";
 import type { MatrixCell, NotebookCell } from "@web/notebook/types";
 import type { NotebookTemplateId } from "@web/notebook/templates";
 import { useInspectorVariableHistory } from "@web/hooks/useInspectorVariableHistory";
@@ -72,6 +74,7 @@ export function NotebookPage({ id }: { id: string }) {
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
+    setPeriodOverride(null);
     void loadNotebook(id).then((loaded) => {
       if (cancelled) {
         return;
@@ -115,7 +118,7 @@ export function NotebookPage({ id }: { id: string }) {
     [notebook]
   );
 
-  const selectedPeriodIndex = useMemo(() => {
+  const maxPeriodIndex = useMemo(() => {
     if (!notebook) {
       return 0;
     }
@@ -124,6 +127,23 @@ export function NotebookPage({ id }: { id: string }) {
       .map((cell) => cell.id);
     return resolveMaxPeriodIndex(notebook.getResult, runCellIds);
   }, [notebook]);
+
+  // `periodOverride` of null means "follow the final period" (the default);
+  // once the reader scrubs, honour their choice clamped to the available range.
+  const [periodOverride, setPeriodOverride] = useState<number | null>(null);
+  const selectedPeriodIndex =
+    periodOverride == null ? maxPeriodIndex : Math.min(periodOverride, maxPeriodIndex);
+
+  const [matrixEntryDisplayModes, setMatrixEntryDisplayModes] = useState<
+    Record<string, MatrixEntryDisplayMode>
+  >({});
+
+  const handleMatrixEntryDisplayModeChange = useCallback(
+    (cellId: string, mode: MatrixEntryDisplayMode) => {
+      setMatrixEntryDisplayModes((current) => ({ ...current, [cellId]: mode }));
+    },
+    []
+  );
 
   const [inspectorContext, setInspectorContext] = useState<VariableInspectRequest | null>(null);
   const inspectorHistory = useInspectorVariableHistory();
@@ -292,6 +312,29 @@ export function NotebookPage({ id }: { id: string }) {
 
   const showContents = contentsEntries.length > 1;
 
+  const showScrubber = maxPeriodIndex > 0;
+
+  const controlsBar = (
+    <div className="publication-controls publication-no-print">
+      {showScrubber ? (
+        <PeriodScrubber
+          maxIndex={maxPeriodIndex}
+          onChange={setPeriodOverride}
+          selectedIndex={selectedPeriodIndex}
+        />
+      ) : null}
+      <button
+        type="button"
+        className="publication-width-toggle"
+        aria-pressed={wideMode}
+        title={wideMode ? "Switch to standard width" : "Switch to wide width"}
+        onClick={handleToggleWideMode}
+      >
+        {wideMode ? "Standard width" : "Wide width"}
+      </button>
+    </div>
+  );
+
   return (
     <div
       className={`publication-root publication-mode-publish docs-notebook${
@@ -300,14 +343,6 @@ export function NotebookPage({ id }: { id: string }) {
     >
       <nav className="docs-breadcrumb publication-no-print">
         <a href="#/">← All notebooks</a>
-        <button
-          type="button"
-          className="docs-width-toggle"
-          aria-pressed={wideMode}
-          onClick={handleToggleWideMode}
-        >
-          {wideMode ? "Standard width" : "Wide width"}
-        </button>
       </nav>
       <header className="publication-header">
         <p className="publication-eyebrow">MoneyJS publication</p>
@@ -321,12 +356,17 @@ export function NotebookPage({ id }: { id: string }) {
           }`}
         >
           <main className="publication-main">
+            {controlsBar}
             {viewModel.bodySections.map((section) => (
               <DocsCellView
                 key={section.anchorId}
                 cells={notebook.document.cells}
                 getResult={notebook.getResult}
                 interaction={buildCellInteraction(section.cell)}
+                matrixEntryDisplayMode={matrixEntryDisplayModes[section.cell.id] ?? "equation"}
+                onMatrixEntryDisplayModeChange={(mode) =>
+                  handleMatrixEntryDisplayModeChange(section.cell.id, mode)
+                }
                 onRequestMatrixGraph={handleMatrixGraphRequest}
                 section={section}
                 selectedPeriodIndex={selectedPeriodIndex}
@@ -342,6 +382,10 @@ export function NotebookPage({ id }: { id: string }) {
                     cells={notebook.document.cells}
                     getResult={notebook.getResult}
                     interaction={buildCellInteraction(section.cell)}
+                    matrixEntryDisplayMode={matrixEntryDisplayModes[section.cell.id] ?? "equation"}
+                    onMatrixEntryDisplayModeChange={(mode) =>
+                      handleMatrixEntryDisplayModeChange(section.cell.id, mode)
+                    }
                     onRequestMatrixGraph={handleMatrixGraphRequest}
                     section={section}
                     selectedPeriodIndex={selectedPeriodIndex}

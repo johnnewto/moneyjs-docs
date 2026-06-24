@@ -137,31 +137,6 @@ a {
   text-decoration: none;
 }
 
-.docs-width-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  font: inherit;
-  font-size: 0.85rem;
-  color: var(--docs-muted);
-  background: var(--docs-surface);
-  border: 1px solid var(--docs-border);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.docs-width-toggle:hover {
-  border-color: var(--docs-accent);
-  color: var(--docs-accent);
-}
-
-.docs-width-toggle[aria-pressed="true"] {
-  border-color: var(--docs-accent);
-  color: var(--docs-accent);
-}
-
 .docs-share-dialog {
   max-width: min(32rem, calc(100vw - 2rem));
   border: 1px solid var(--docs-border);
@@ -188,6 +163,46 @@ a {
   display: flex;
   justify-content: flex-end;
   margin: 0;
+}
+
+/* Publication controls bar: keep the matrix display toggle and the period
+   scrubber on a single row, and let the scrubber span the rest of the row so
+   its slider is wide (roughly twice the matrix toggle).
+
+   The scrubber's grid layout and full-width range input live in moneyjs
+   `partials/controls.css`, which the publication bundle does NOT include, so the
+   slider otherwise falls back to `display: block` and its ~130px intrinsic
+   width. Restate the needed layout rules here. */
+.publication-controls {
+  flex-wrap: nowrap;
+}
+
+.publication-controls .period-scrubber {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.period-scrubber-bar {
+  display: grid;
+  align-items: center;
+  gap: 0.75rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.period-scrubber-controls {
+  display: grid;
+  align-items: center;
+  gap: 0.55rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.period-scrubber input[type="range"] {
+  width: 100%;
+}
+
+.period-scrubber-label {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Variable inspector popup width override vs the moneyjs default (28rem).
