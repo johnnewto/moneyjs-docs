@@ -1020,18 +1020,4 @@ cells:
         - {type: chart, id: scenario-cpi-inflation-chart, title: "(d) Inflation rate (% change in CPI)", series: [{expression: 100 * inflc, sourceRunCellId: out-of-sample-run, label: Baseline, unit: "%"}, {expression: 100 * inflc, sourceRunCellId: alternative-scenario-1-run, label: "1. Higher inflation", unit: "%"}, {expression: 100 * inflc, sourceRunCellId: alternative-scenario-2-run, label: "2. Higher inflation + higher policy rate", unit: "%"}, {expression: 100 * inflc, sourceRunCellId: alternative-scenario-3-run, label: "3. Austerity", unit: "%"}], axisMode: shared, referenceTrace: observed, sourceRunCellId: out-of-sample-run}
         - {type: chart, id: scenario-debt-ratio-chart, title: "(e) Government debt to GDP ratio", series: [{expression: 100 * deb_ratio, sourceRunCellId: out-of-sample-run, label: Baseline, unit: "%"}, {expression: 100 * deb_ratio, sourceRunCellId: alternative-scenario-1-run, label: "1. Higher inflation", unit: "%"}, {expression: 100 * deb_ratio, sourceRunCellId: alternative-scenario-2-run, label: "2. Higher inflation + higher policy rate", unit: "%"}, {expression: 100 * deb_ratio, sourceRunCellId: alternative-scenario-3-run, label: "3. Austerity", unit: "%"}], axisMode: shared, referenceTrace: observed, sourceRunCellId: out-of-sample-run}
         - {type: chart, id: scenario-deficit-ratio-chart, title: "(f) Government deficit to GDP ratio", series: [{expression: 100 * def_ratio, sourceRunCellId: out-of-sample-run, label: Baseline, unit: "%"}, {expression: 100 * def_ratio, sourceRunCellId: alternative-scenario-1-run, label: "1. Higher inflation", unit: "%"}, {expression: 100 * def_ratio, sourceRunCellId: alternative-scenario-2-run, label: "2. Higher inflation + higher policy rate", unit: "%"}, {expression: 100 * def_ratio, sourceRunCellId: alternative-scenario-3-run, label: "3. Austerity", unit: "%"}], axisMode: shared, referenceTrace: observed, sourceRunCellId: out-of-sample-run}
-  - table:
-      id: scenario-1-summary-table
-      title: "Scenario 1 key aggregates (1997-2028)"
-      variables: [yR, inflc, un, def_ratio, deb_ratio, rstar, gov]
-      sourceRunCellId: alternative-scenario-1-run
-  - table:
-      id: scenario-2-summary-table
-      title: "Scenario 2 key aggregates (1997-2028)"
-      variables: [yR, inflc, un, def_ratio, deb_ratio, rstar, gov]
-      sourceRunCellId: alternative-scenario-2-run
-  - table:
-      id: scenario-3-summary-table
-      title: "Scenario 3 key aggregates (1997-2028)"
-      variables: [yR, inflc, un, def_ratio, deb_ratio, rstar, gov]
-      sourceRunCellId: alternative-scenario-3-run
+
