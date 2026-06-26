@@ -857,26 +857,6 @@ cells:
         - un
         - rb
       sourceRunCellId: baseline-run
-  - table:
-      id: out-of-sample-table
-      title: Continuous run key aggregates (1997-2028)
-      variables:
-        - y
-        - yR
-        - consR
-        - iddR
-        - xR
-        - imR
-        - deb
-        - deb_ratio
-        - p
-        - pc
-        - p_en
-        - nd
-        - un
-        - rb
-        - rstar
-      sourceRunCellId: out-of-sample-run
   - markdown:
       id: watertightness
       title: Model watertightness
