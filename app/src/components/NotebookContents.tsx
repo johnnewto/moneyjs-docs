@@ -13,7 +13,7 @@ const SHARE_ORIGIN = (import.meta.env.VITE_MONEYJS_SHARE_ORIGIN ?? "https://john
   .trim()
   .replace(/\/$/, "");
 const SHARE_BASE_PATH = (import.meta.env.VITE_MONEYJS_SHARE_BASE ?? "/moneyjs/").trim().replace(/\/?$/, "/");
-const SHARE_MAX_COMPRESSED_LENGTH = 64_000;
+const SHARE_MAX_COMPRESSED_LENGTH = 128_000;
 
 function buildMoneyjsShareUrl(document: NotebookDocument): { url: string } | { error: string } {
   const nbz = compressNotebookSharePayload(notebookToJson(document));
