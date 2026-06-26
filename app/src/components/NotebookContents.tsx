@@ -3,11 +3,13 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { notebookToJson } from "@sfcr/notebook-core";
 import type { NotebookDocument } from "@web/notebook/types";
 import {
-  NOTEBOOK_SHARE_HASH_ROUTE,
   NOTEBOOK_SHARE_QUERY_PARAM,
   compressNotebookSharePayload
 } from "@web/notebook/notebookShareLink";
 import type { PublicationContentsEntry } from "@web/publication/buildPublicationViewModel";
+
+// Mirrors the (non-exported) hash route in @web/notebook/notebookShareLink.
+const NOTEBOOK_SHARE_HASH_ROUTE = "#/notebook";
 
 const SHARE_ORIGIN = (import.meta.env.VITE_MONEYJS_SHARE_ORIGIN ?? "https://johnnewto.github.io")
   .trim()
