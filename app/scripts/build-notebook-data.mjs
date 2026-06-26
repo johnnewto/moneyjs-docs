@@ -49,7 +49,7 @@ const viteServer = await createServer({
 try {
   const load = (entry) => viteServer.ssrLoadModule(pathToFileURL(entry).href);
 
-  const { runBaseline, runScenario } = await load(coreEntry);
+  const { runBaseline, runScenario, runSegmentedExogenize } = await load(coreEntry);
   const { notebookFromYaml } = await load(notebookCoreEntry);
   const { buildEditorStateForNotebookModel, resolveRunCellModelKey } = await load(modelSectionsEntry);
   const { buildRuntimeConfig } = await load(editorModelEntry);
@@ -59,6 +59,7 @@ try {
   const helpers = {
     runBaseline,
     runScenario,
+    runSegmentedExogenize,
     buildEditorStateForNotebookModel,
     resolveRunCellModelKey,
     buildRuntimeConfig,
@@ -189,7 +190,12 @@ function solveDocument(document, helpers) {
 
     let result;
     if (cell.mode === "baseline") {
-      result = helpers.runBaseline(runtime.model, options);
+      // Windowed exogenize (throughPeriod) produces a segmentation plan that must be
+      // solved with runSegmentedExogenize; plain runBaseline ignores the window and
+      // diverges (mirrors useNotebookRunner's baseline path).
+      result = runtime.segmentation
+        ? helpers.runSegmentedExogenize(runtime.model, options, runtime.segmentation)
+        : helpers.runBaseline(runtime.model, options);
     } else {
       const baselineCell = resolveBaselineRunCell(cell);
       let baseline;
