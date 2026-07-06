@@ -368,6 +368,7 @@ export function NotebookPage({ id }: { id: string }) {
                   handleMatrixEntryDisplayModeChange(section.cell.id, mode)
                 }
                 onRequestMatrixGraph={handleMatrixGraphRequest}
+                originYear={notebook.document.metadata.timeAxis?.startYear}
                 section={section}
                 selectedPeriodIndex={selectedPeriodIndex}
               />
@@ -387,6 +388,7 @@ export function NotebookPage({ id }: { id: string }) {
                       handleMatrixEntryDisplayModeChange(section.cell.id, mode)
                     }
                     onRequestMatrixGraph={handleMatrixGraphRequest}
+                    originYear={notebook.document.metadata.timeAxis?.startYear}
                     section={section}
                     selectedPeriodIndex={selectedPeriodIndex}
                   />

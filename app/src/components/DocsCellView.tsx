@@ -19,6 +19,7 @@ export function DocsCellView(props: {
   matrixEntryDisplayMode?: MatrixEntryDisplayMode;
   onMatrixEntryDisplayModeChange?(mode: MatrixEntryDisplayMode): void;
   onRequestMatrixGraph?(request: MatrixGraphRequest): void;
+  originYear?: number;
   section: PublicationSection;
   selectedPeriodIndex: number;
   showHeading?: boolean;
